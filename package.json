@@ -35,5 +35,6 @@
     "example.composableBundle": "ts-node src/examples/sendComposableBundle.ts",
     "example.history": "ts-node src/examples/historicalStreamData.ts",
     "example.tx": "ts-node src/examples/sendTx.ts"
-  }
+  },
+  "packageManager": "yarn@1.22.22"
 }
