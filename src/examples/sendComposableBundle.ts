@@ -69,7 +69,7 @@ const sendTestBundle = async (
     console.log("Simulation successful:", simResult);
     // Here you could add checks for expected profit/outcome
     if (!simResult.success) {
-      throw new Error("Simulation failed");
+      throw new Error(`Simulation failed: ${simResult}`);
     }
   } catch (error) {
     console.error("Simulation failed:", error);
