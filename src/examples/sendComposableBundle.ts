@@ -1,4 +1,5 @@
 import {
+  Interface,
   JsonRpcProvider,
   TransactionRequest,
   Wallet,
@@ -14,6 +15,10 @@ import { getProvider, initMevShareClient } from "./lib/helpers";
 import env from "./lib/env";
 
 const NUM_TARGET_BLOCKS = 20;
+
+const erc721Interface = new Interface([
+  "function transferFrom(address from, address to, uint256 tokenId)",
+]);
 
 /** Send a bundle that shares as much data as possible by setting the `privacy` param. */
 const sendTestBundle = async (
@@ -35,11 +40,12 @@ const sendTestBundle = async (
   const tx1: TransactionRequest = {
     type: 2,
     chainId: provider._network.chainId,
-    to: "0x9A3C34EB976C13D721BDbcea5cb922b0cb2A6E1E",
-    nonce: await wallet1.getNonce(),
-    value: 0,
+    to: wallet1.address,
+    nonce: await wallet2.getNonce(),
+    // Calculate required ETH: gas limit × (base fee + priority fee) × safety multiplier
+    value: BigInt(100000) * maxFeePerGas + BigInt(1e16), // Add 0.01 ETH buffer
     gasLimit: 22000,
-    data: hexlify(toUtf8Bytes("im shariiiiiing")),
+    data: hexlify(toUtf8Bytes("NFT rescue tx")),
     maxFeePerGas,
     maxPriorityFeePerGas,
   };
@@ -47,18 +53,22 @@ const sendTestBundle = async (
   const tx2: TransactionRequest = {
     type: 2,
     chainId: provider._network.chainId,
-    to: "0x9A3C34EB976C13D721BDbcea5cb922b0cb2A6E1E",
-    nonce: await wallet2.getNonce(),
+    to: "0x9036250A8Ec7070f82b969C7C9FB4353ef4D8338",
+    nonce: await wallet1.getNonce(),
     value: 0,
-    gasLimit: 22000,
-    data: hexlify(toUtf8Bytes("im shariiiiiing")),
+    gasLimit: 100000,
+    data: erc721Interface.encodeFunctionData("transferFrom", [
+      wallet1.address,
+      "0x9A3C34EB976C13D721BDbcea5cb922b0cb2A6E1E",
+      BigInt(186),
+    ]),
     maxFeePerGas,
     maxPriorityFeePerGas,
   };
 
   const bundle = [
-    { tx: await wallet1.signTransaction(tx1), canRevert: false },
-    { tx: await wallet2.signTransaction(tx2), canRevert: false },
+    { tx: await wallet2.signTransaction(tx1), canRevert: true }, // send funds from wallet2 to wallet1
+    { tx: await wallet1.signTransaction(tx2), canRevert: false }, // send nft from wallet1 to 6E1E
   ];
   const bundleParams: BundleParams = {
     inclusion: {
@@ -149,8 +159,8 @@ const main = async () => {
   const { mevshare } = await initMevShareClient(provider);
 
   const targetBlock = (await provider.getBlockNumber()) + 1;
-  const wallet1 = new Wallet(env.senderKey, provider);
-  const wallet2 = new Wallet(env.senderKey2, provider);
+  const wallet1 = new Wallet(env.senderKey, provider); // ...d6DC
+  const wallet2 = new Wallet(env.senderKey2, provider); // ...55da
   const { bundleParams, backrunResult } = await sendTestBundle(
     provider,
     mevshare,
