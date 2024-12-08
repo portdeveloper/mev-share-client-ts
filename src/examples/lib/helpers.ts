@@ -7,15 +7,11 @@ export function getProvider() {
   return new JsonRpcProvider(Env.providerUrl, networks.sepolia);
 }
 
-/** Initializes wallet and provider for examples, using Sepolia. */
-export async function initExample(provider: JsonRpcProvider) {
+/** Initializes MEV-Share client with specified wallet on Sepolia. */
+export async function initMevShareClient(provider: JsonRpcProvider) {
   const authSigner = new Wallet(Env.authKey).connect(provider);
 
   return {
-    provider,
-    wallet: new Wallet(Env.senderKey).connect(provider),
-    authSigner,
     mevshare: MevShareClient.useEthereumSepolia(authSigner),
-    feeData: await provider.getFeeData(),
   };
 }

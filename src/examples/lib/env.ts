@@ -11,6 +11,9 @@ if (!process.env.AUTH_PRIVATE_KEY) {
 if (!process.env.SENDER_PRIVATE_KEY) {
     throw environmentError("SENDER_PRIVATE_KEY")
 }
+if (!process.env.SENDER_PRIVATE_KEY_2) {
+    throw environmentError("SENDER_PRIVATE_KEY_2")
+}
 if (!process.env.PROVIDER_URL) {
     throw environmentError("PROVIDER_URL")
 }
@@ -19,4 +22,5 @@ export default {
     authKey: process.env.AUTH_PRIVATE_KEY || "",
     providerUrl: process.env.PROVIDER_URL || "",
     senderKey: process.env.SENDER_PRIVATE_KEY || "",
+    senderKey2: process.env.SENDER_PRIVATE_KEY_2 || "",
 }
